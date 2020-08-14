@@ -3,22 +3,33 @@ import json
 
 
 class Imdb():
+    """Creating Imdb class for initializing url and api key"""
 
     def __init__(self):
-        self.url = url = "https://imdb-api.com/en/API/{}/{}/{}"
+        """Constructor for Imdb class"""
+        # Initializing url and API key
+        self.url = url = "https://imdb-api.com/en/API/{}/{}/"
         with open('credentials.json') as file:
             self.api_key = json.load(file)['api_key']
 
 
 
 class Movie(Imdb):
+    """Class for analyzing movies"""
 
     def find_movie(self,name):
-        json_data = requests.get(url.format('SearchMovie',self.api_key,name)).text
-        return json_data
+        data = requests.get(self.url.format('SearchMovie',self.api_key) + name).json()
+        return data
 
     def top_movies(self):
-        pass
+
+        """Returns dictionary with top 250 movies all time as key value pairs"""
+        movies = {}
+        data = requests.get(self.url.format('Top250Movies',self.api_key)).json()
+        # Loops through the json data in dictionary format
+        for item in data['items']:
+            movies.setdefault(item['rank'], item['title'])
+        return movies
 
     def popular_movies(self):
         pass
@@ -47,3 +58,7 @@ class TvShow(Imdb):
 
     def popular_tvshows(self):
         pass
+
+
+a = Movie()
+a.top_movies()
