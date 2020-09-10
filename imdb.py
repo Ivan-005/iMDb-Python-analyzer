@@ -1,5 +1,6 @@
 import requests
 import json
+import time
 
 
 class Imdb():
@@ -17,9 +18,10 @@ class Imdb():
 class Movie(Imdb):
     """Class for analyzing movies"""
 
-    def find_movie(self,name):
+    def find_movie(self):
 
-        """Returns dictoinary with film id as jey and Filmd name and year as values"""
+        """Returns dictoinary with film id as key and movie name and year as values"""
+        name = input("Enter the movie name: ")
         search = {}
         data = requests.get(self.url.format('SearchMovie',self.api_key) + name).json()
         # Loops through the dictionary
@@ -103,9 +105,10 @@ class Movie(Imdb):
 
 class TvShow(Imdb):
 
-    def find_tvshow(self,tvshow):
+    def find_tvshow(self):
 
         """Returns dictionary about tvshow"""
+        tvshow = input("Enter the Tv-Show name: ")
         tv_search = {}
         data = requests.get(self.url.format('SearchSeries',self.api_key) + tvshow).json()
         #Loops through the data
@@ -132,11 +135,75 @@ class TvShow(Imdb):
         data = requests.get(self.url.format('MostPopularTVs', self.api_key)).json()
         #Loops through the data
         for item in data['items']:
-            popular_shows.setdefault(item['id'], [item['title'], item['rank'], item['year'], item['imDbRating']]) # da popunam ovde
+            popular_shows.setdefault(item['id'], [item['title'], item['rank'], item['year'], item['imDbRating']])
 
         return popular_shows
 
 
+class Engine():
+    """Engine fot the script"""
 
-a = TvShow()
-print(a.popular_tvshows())
+    def __init__(self):
+        """Constructs and initializes all necessary objects"""
+        self.imdb = Imdb()
+        self.movie = Movie()
+        self.tvshow = TvShow()
+        self.func = {
+        '1': self.movie.find_movie,
+        '2': self.movie.top_movies,
+        '3': self.movie.popular_movies,
+        '4': self.movie.in_theaters,
+        '5': self.movie.soon_movies,
+        '6': self.movie.box_office_now,
+        '7': self.movie.box_office_alltime,
+        '8': self.tvshow.find_tvshow,
+        '9': self.tvshow.top_tvshow,
+        '10': self.tvshow.popular_tvshows
+        }
+
+    
+
+    def menu(self):
+        print("""
+        ---ALL FUNCTIONS RETURN DICTIONARY FORMAT---
+
+        0. Quit the program
+
+        Analyzing movies functions:
+
+            1. find_movie (Finds movie and returns id, title and description)
+            2. top_movies (Returns top 250 movies)
+            3. popular_movies (Returns most 100 popular movies)
+            4. in_theaters (Returns all in theaters movies)
+            5. soon_movies (Returns all upcoming movies)
+            6. box_office_now (Returns Box office now)
+            7. box_office_alltime (Returns Box office for all time)
+
+        Analyzing Tv-Shows functions:
+
+            8. find_tvshow (Finds Tv-Show and returns id, title and description)
+            9. top_tvshow (Returns top 250 Tv-Show)
+            10. popular_tvshows (Returns most 100 popular Tv-Show)
+
+        Press Control + C (Ctrl + C) to exit the program
+        """)
+
+
+
+    def run(self):
+        """Function for running the whole script"""
+
+        while True:
+            #Mainloop for the program
+            self.menu()
+            decision = input("Please enter the number of your choice: ")
+            action = self.func.get(decision)
+            if action:
+                print(action())
+            else:
+                print("Invalid choice.")
+
+
+
+if __name__ == '__main__':
+    Engine().run()
